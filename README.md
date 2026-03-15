@@ -1,14 +1,8 @@
-# Polaris - Build a Cursor AI Alternative
+# Turbo - A Cursor AI Alternative
 
-This is the repository for a comprehensive [YouTube tutorial series](https://youtu.be/Xf9rHPNBMyQ) where we build a **fully-featured cloud IDE** from scratch.
+## What is this application
 
-[![Watch the Tutorial](https://img.shields.io/badge/YouTube-Watch%20Tutorial-red?style=for-the-badge&logo=youtube)](https://youtu.be/Xf9rHPNBMyQ)
-
-> **Note:** This is **Part 1 of 2** of the tutorial series. The codebase is functional but incomplete - Part 2 will add the AI Agent, WebContainer preview, and GitHub integration.
-
-## What We're Building
-
-Polaris is a browser-based IDE inspired by Cursor AI, featuring:
+Turbo is a browser-based IDE inspired by Cursor AI, featuring:
 
 - Real-time collaborative code editing
 - AI-powered code suggestions and quick edit (Cmd+K)
@@ -29,35 +23,35 @@ Polaris is a browser-based IDE inspired by Cursor AI, featuring:
 | **Execution** | WebContainer API, xterm.js                                  |
 | **UI**        | shadcn/ui, Radix UI                                         |
 
-## Part 1 Contents (Chapters 1-12)
+## Part 1 Contents (Steps 1-12)
 
 ### Phase 1: Foundation & Sponsor Technologies
 
-- **Chapter 1:** Project Setup, UI Library & Theme
-- **Chapter 2:** Clerk Authentication & Protected Routes
-- **Chapter 3:** Convex Database & Real-time Setup
-- **Chapter 4:** Inngest - Background Jobs & Non-Blocking UI
-- **Chapter 5:** Firecrawl - Teaching AI with Live Documentation
-- **Chapter 6:** Sentry - Error Tracking & LLM Monitoring
-- **Chapter 7:** Projects Dashboard & Landing Page
+- **Step 1:** Project Setup, UI Library & Theme
+- **Step 2:** Clerk Authentication & Protected Routes
+- **Step 3:** Convex Database & Real-time Setup
+- **Step 4:** Inngest - Background Jobs & Non-Blocking UI
+- **Step 5:** Firecrawl - Teaching AI with Live Documentation
+- **Step 6:** Sentry - Error Tracking & LLM Monitoring
+- **Step 7:** Projects Dashboard & Landing Page
 
 ### Phase 2: File System & Editor
 
-- **Chapter 8:** Project IDE Layout & Resizable Panes
-- **Chapter 9:** File Explorer - Full Implementation
-- **Chapter 10:** Code Editor & State Management
+- **Step 8:** Project IDE Layout & Resizable Panes
+- **Step 9:** File Explorer - Full Implementation
+- **Step 10:** Code Editor & State Management
 
 ### Phase 3: AI Features (Partial)
 
-- **Chapter 11:** AI Suggestions & Quick Edit
-- **Chapter 12:** Conversation System
+- **Step 11:** AI Suggestions & Quick Edit
+- **Step 12:** Conversation System
 
-## Part 2 Contents (Chapters 13-16) - Coming Soon
+## Part 2 Contents (Steps 13-16) - Coming Soon
 
-- **Chapter 13:** AI Agent & Tools (AgentKit, file management tools)
-- **Chapter 14:** WebContainer, Terminal & Preview
-- **Chapter 15:** GitHub Import & Export
-- **Chapter 16:** AI Project Creation & Final Polish
+- **Step 13:** AI Agent & Tools (AgentKit, file management tools)
+- **Step 14:** WebContainer, Terminal & Preview
+- **Step 15:** GitHub Import & Export
+- **Step 16:** AI Project Creation & Final Polish
 
 ## Getting Started
 
