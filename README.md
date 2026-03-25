@@ -25,7 +25,7 @@ Turbo is a browser-based IDE inspired by Cursor AI, featuring:
 
 ## Part 1 Contents (Steps 1-12)
 
-### Phase 1: Foundation & Sponsor Technologies
+### Phase 1: Foundation & Technologies
 
 - **Step 1:** Project Setup, UI Library & Theme
 - **Step 2:** Clerk Authentication & Protected Routes
@@ -46,7 +46,7 @@ Turbo is a browser-based IDE inspired by Cursor AI, featuring:
 - **Step 11:** AI Suggestions & Quick Edit
 - **Step 12:** Conversation System
 
-## Part 2 Contents (Steps 13-16) - Coming Soon
+## Part 2 Contents (Steps 13-16)
 
 - **Step 13:** AI Agent & Tools (AgentKit, file management tools)
 - **Step 14:** WebContainer, Terminal & Preview
@@ -212,40 +212,6 @@ npm run build     # Build for production
 npm run start     # Start production server
 npm run lint      # Run ESLint
 ```
-
-## Tutorial Links
-
-- **YouTube Playlist:** [Coming Soon]
-- **Part 1:** Chapters 1-12
-- **Part 2:** Chapters 13-16
-
-## Sponsors
-
-A huge thank you to the sponsors who made this tutorial possible. Consider checking them out - they offer generous free tiers perfect for learning!
-
-### Authentication
-
-**[Clerk](https://cwa.run/clerk)** - Add authentication to your app in minutes, not days.
-
-### Database
-
-**[Convex](https://cwa.run/convex)** - The real-time database that makes building collaborative apps a breeze.
-
-### Background Jobs
-
-**[Inngest](https://cwa.run/inngest)** - Reliable background jobs and event-driven workflows.
-
-### Web Scraping
-
-**[Firecrawl](https://cwa.run/firecrawl)** - Turn any website into LLM-ready data.
-
-### Error Tracking
-
-**[Sentry](https://cwa.run/sentry)** - See what's broken and fix it fast.
-
-### Code Review
-
-**[CodeRabbit](https://cwa.run/coderabbit)** - AI-powered code reviews that catch bugs before your users do.
 
 ## Acknowledgments
 
