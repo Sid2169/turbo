@@ -1,3 +1,33 @@
+<div align="center">
+  <br />
+    <a href="https://github.com/code-with-antonio/polaris" target="_blank">
+      <img src="public/logo.svg" alt="Turbo IDE Logo" width="120" height="120">
+    </a>
+  <br />
+
+  <div>
+<img src="https://img.shields.io/badge/-Next.js_16-000000?style=for-the-badge&logo=Next.js&logoColor=white" />
+<img src="https://img.shields.io/badge/-React_19-61DAFB?style=for-the-badge&logo=React&logoColor=black" />
+<img src="https://img.shields.io/badge/-TypeScript-3178C6?style=for-the-badge&logo=Typescript&logoColor=white" />
+<img src="https://img.shields.io/badge/-Tailwind-06B6D4?style=for-the-badge&logo=Tailwind-CSS&logoColor=white" /><br/>
+<img src="https://img.shields.io/badge/-CodeMirror-081C33?style=for-the-badge&logo=CodeMirror&logoColor=white" />
+<img src="https://img.shields.io/badge/-Convex-5B5FDE?style=for-the-badge&logo=Convex&logoColor=white" />
+<img src="https://img.shields.io/badge/-Clerk-6C47FF?style=for-the-badge&logo=Clerk&logoColor=white" />
+<img src="https://img.shields.io/badge/-WebContainer-654FF0?style=for-the-badge&logo=Stackblitz&logoColor=white" />
+  </div>
+
+  <h3 align="center">Turbo — AI-Powered Browser IDE</h3>
+
+  <div align="center">
+    A Cursor AI alternative built for the web. Fork this repo to get started! ⭐
+  </div>
+</div>
+
+![Home Page View](homePage.png)
+
+[Live Demo](https://turbo-navy-iota.vercel.app/) • [Report Bug](https://github.com/Sid2169/turbo/issues) • [Request Feature](https://github.com/Sid2169/turbo/issues)
+
+
 # Turbo - A Cursor AI Alternative
  
 Turbo is a browser-based IDE inspired by Cursor AI, featuring:
