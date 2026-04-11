@@ -1,7 +1,5 @@
 # Turbo - A Cursor AI Alternative
-
-## What is this application
-
+ 
 Turbo is a browser-based IDE inspired by Cursor AI, featuring:
 
 - Real-time collaborative code editing
