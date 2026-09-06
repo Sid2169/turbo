@@ -1,6 +1,6 @@
 <div align="center">
   <br />
-    <a href="https://github.com/code-with-antonio/polaris" target="_blank">
+    <a href="https://github.com/Sid2169/turbo" target="_blank">
       <img src="public/logo.svg" alt="Turbo IDE Logo" width="120" height="120">
     </a>
   <br />
@@ -100,8 +100,8 @@ Turbo is a browser-based IDE inspired by Cursor AI, featuring:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/code-with-antonio/polaris.git
-   cd polaris
+   git clone https://github.com/Sid2169/turbo.git
+   cd turbo
    ```
 
 2. Install dependencies:

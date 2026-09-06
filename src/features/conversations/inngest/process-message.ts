@@ -122,7 +122,7 @@ export const processMessage = inngest.createFunction(
 
     // Create the coding agent with file tools
     const codingAgent = createAgent({
-      name: "polaris",
+      name: "turbo",
       description: "An expert AI coding assistant",
       system: systemPrompt,
        ...codingConfig,
@@ -156,7 +156,7 @@ export const processMessage = inngest.createFunction(
 
     // Create network with single agent
     const network = createNetwork({
-      name: "polaris-network",
+      name: "turbo-network",
       agents: [codingAgent],
       maxIter: 20,
       router: ({ network }) => {
