@@ -170,7 +170,7 @@ export const ConversationSidebar = ({
                   {message.status === "processing" ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <LoaderIcon className="size-4 animate-spin" />
-                      <span>Thinking...</span>
+                      <span>{message.content || "Starting your request..."}</span>
                     </div>
                   ) : message.status === "cancelled" ? (
                     <span className="text-muted-foreground italic">

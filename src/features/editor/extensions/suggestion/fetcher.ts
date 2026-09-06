@@ -1,4 +1,4 @@
-import ky from "ky";
+import ky, { HTTPError } from "ky";
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -43,7 +43,13 @@ export const fetcher = async (
     if (error instanceof Error && error.name === "AbortError") {
       return null;
     }
-    toast.error("Failed to fetch AI completion");
+    // Expired completions should not interrupt typing.
+    if (signal.aborted || (error instanceof Error && error.name === "TimeoutError")) return null;
+    if (error instanceof HTTPError && error.response.status === 504) return null;
+    const body = error instanceof HTTPError
+      ? await error.response.json().catch(() => null) as { error?: string } | null
+      : null;
+    toast.error(body?.error || "Failed to fetch AI completion", { id: "ai-completion-error" });
     return null;
   }
 };
