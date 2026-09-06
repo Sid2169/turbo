@@ -1,14 +1,11 @@
-import { createAgent, anthropic, createNetwork } from '@inngest/agent-kit';
+import { createAgent, createNetwork } from '@inngest/agent-kit';
 
 import { inngest } from "@/inngest/client";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { NonRetriableError } from "inngest";
 import { convex } from "@/lib/convex-client";
 import { api } from "../../../../convex/_generated/api";
-import { 
-  CODING_AGENT_SYSTEM_PROMPT, 
-  TITLE_GENERATOR_SYSTEM_PROMPT
-} from "./constants";
+import { CODING_AGENT_SYSTEM_PROMPT } from "./constants";
 import { DEFAULT_CONVERSATION_TITLE } from "../constants";
 import { createReadFilesTool } from './tools/read-files';
 import { createListFilesTool } from './tools/list-files';
@@ -18,6 +15,7 @@ import { createCreateFolderTool } from './tools/create-folder';
 import { createRenameFileTool } from './tools/rename-file';
 import { createDeleteFilesTool } from './tools/delete-files';
 import { createScrapeUrlsTool } from './tools/scrape-urls';
+import { createConversationAgentConfig, getMessageFailureContent } from './model';
 
 interface MessageEvent {
   messageId: Id<"messages">;
@@ -29,6 +27,7 @@ interface MessageEvent {
 export const processMessage = inngest.createFunction(
   {
     id: "process-message",
+    retries: 1,
     cancelOn: [
       {
         event: "message/cancel",
@@ -37,7 +36,7 @@ export const processMessage = inngest.createFunction(
     ],
     onFailure: async ({ event, step }) => {
       const { messageId } = event.data.event.data as MessageEvent;
-      const internalKey = process.env.POLARIS_CONVEX_INTERNAL_KEY;
+      const internalKey = process.env.TURBO_CONVEX_INTERNAL_KEY;
 
       // Update the message with error content
       if (internalKey) {
@@ -45,8 +44,7 @@ export const processMessage = inngest.createFunction(
           await convex.mutation(api.system.updateMessageContent, {
             internalKey,
             messageId,
-            content:
-              "My apologies, I encountered an error while processing your request. Let me know if you need anything else!",
+            content: getMessageFailureContent(event.data.error.message),
           });
         });
       }
@@ -63,14 +61,14 @@ export const processMessage = inngest.createFunction(
       message
     } = event.data as MessageEvent;
 
-    const internalKey = process.env.POLARIS_CONVEX_INTERNAL_KEY; 
+    const internalKey = process.env.TURBO_CONVEX_INTERNAL_KEY;
 
     if (!internalKey) {
-      throw new NonRetriableError("POLARIS_CONVEX_INTERNAL_KEY is not configured");
+      throw new NonRetriableError("TURBO_CONVEX_INTERNAL_KEY is not configured");
     }
 
-    // TODO: Check if this is needed
-    await step.sleep("wait-for-db-sync", "1s");
+    // Validate credentials before starting any AI work.
+    const codingConfig = createConversationAgentConfig("coding");
 
     // Get conversation for title generation check
     const conversation = await step.run("get-conversation", async () => {
@@ -98,7 +96,7 @@ export const processMessage = inngest.createFunction(
 
     // Filter out the current processing message and empty messages
     const contextMessages = recentMessages.filter(
-      (msg) => msg._id !== messageId && msg.content.trim() !== ""
+      (msg) => msg._id !== messageId && msg.status !== "processing" && msg.content.trim() !== ""
     );
 
     if (contextMessages.length > 0) {
@@ -109,45 +107,17 @@ export const processMessage = inngest.createFunction(
       systemPrompt += `\n\n## Previous Conversation (for context only - do NOT repeat these responses):\n${historyText}\n\n## Current Request:\nRespond ONLY to the user's new message below. Do not repeat or reference your previous responses.`;
     }
 
-    // Generate conversation title if it's still the default
+    // A title should not add an extra model call before the user's request.
     const shouldGenerateTitle =
       conversation.title === DEFAULT_CONVERSATION_TITLE;
 
     if (shouldGenerateTitle) {
-       const titleAgent = createAgent({
-        name: "title-generator",
-        system: TITLE_GENERATOR_SYSTEM_PROMPT,
-        model: anthropic({
-          model: "claude-3-5-haiku-20241022",
-          defaultParameters: { temperature: 0, max_tokens: 50 },
-        }),
-       });
-
-       const { output } = await titleAgent.run(message, { step });
-
-       const textMessage = output.find(
-        (m) => m.type === "text" && m.role === "assistant"
-      );
-
-      if (textMessage?.type === "text") {
-         const title = 
-          typeof textMessage.content === "string"
-            ? textMessage.content.trim()
-            : textMessage.content
-              .map((c) => c.text)
-              .join("")
-              .trim();
-
-        if (title) {
-          await step.run("update-conversation-title", async () => {
-            await convex.mutation(api.system.updateConversationTitle, {
-              internalKey,
-              conversationId,
-              title,
-            });
-          });
-        }
-      }
+      const title = message.trim().replace(/\s+/g, " ").slice(0, 60);
+      await step.run("update-conversation-title", async () => {
+        await convex.mutation(api.system.updateConversationTitle, {
+          internalKey, conversationId, title: title || DEFAULT_CONVERSATION_TITLE,
+        });
+      });
     }
 
     // Create the coding agent with file tools
@@ -155,10 +125,23 @@ export const processMessage = inngest.createFunction(
       name: "polaris",
       description: "An expert AI coding assistant",
       system: systemPrompt,
-       model: anthropic({
-        model: "claude-opus-4-20250514",
-        defaultParameters: { temperature: 0.3, max_tokens: 16000 }
-       }),
+       ...codingConfig,
+       lifecycle: {
+        ...codingConfig.lifecycle,
+        onStart: async (args) => {
+          const start = await codingConfig.lifecycle.onStart!(args);
+          const iteration = args.network?.state.results.length ?? 0;
+          await step.run(`message-progress-${iteration}`, async () => {
+            await convex.mutation(api.system.updateMessageProgress, {
+              internalKey, messageId,
+              content: iteration === 0
+                ? "Working on your request..."
+                : `Working on your project (step ${iteration + 1})...`,
+            });
+          });
+          return start;
+        },
+       },
        tools: [
         createListFilesTool({ internalKey, projectId }),
         createReadFilesTool({ internalKey }),
@@ -167,7 +150,7 @@ export const processMessage = inngest.createFunction(
         createCreateFolderTool({ projectId, internalKey }),
         createRenameFileTool({ internalKey }),
         createDeleteFilesTool({ internalKey }),
-        createScrapeUrlsTool(),
+        ...(process.env.FIRECRAWL_API_KEY ? [createScrapeUrlsTool()] : []),
        ],
     });
 
@@ -185,7 +168,7 @@ export const processMessage = inngest.createFunction(
           (m) => m.type === "tool_call"
         );
 
-        // Anthropic outputs text AND tool calls together
+        // Models can output text AND tool calls together.
         // Only stop if there's text WITHOUT tool calls (final response)
         if (hasTextResponse && !hasToolCalls) {
           return undefined;
@@ -203,8 +186,11 @@ export const processMessage = inngest.createFunction(
       (m) => m.type === "text" && m.role === "assistant"
     );
 
-    let assistantResponse =
-      "I processed your request. Let me know if you need anything else!";
+    if (!textMessage || lastResult?.output.some((m) => m.type === "tool_call")) {
+      throw new NonRetriableError("Coding agent stopped without a final response");
+    }
+
+    let assistantResponse = "";
 
     if (textMessage?.type === "text") {
       assistantResponse =
@@ -225,4 +211,3 @@ export const processMessage = inngest.createFunction(
     return { success: true, messageId, conversationId };
   }
 );
-

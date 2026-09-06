@@ -46,7 +46,7 @@ Turbo is a browser-based IDE inspired by Cursor AI, featuring:
 | **Frontend**  | Next.js 16, React 19, TypeScript, Tailwind CSS 4            |
 | **Editor**    | CodeMirror 6, Custom Extensions, One Dark Theme             |
 | **Backend**   | Convex (Real-time DB), Inngest (Background Jobs)            |
-| **AI**        | Claude Sonnet 4 (preferred) or Gemini 2.0 Flash (free tier) |
+| **AI**        | Gemini 3.6 Flash (chat and edits), Gemini 3.5 Flash-Lite (autocomplete) |
 | **Auth**      | Clerk (with GitHub OAuth)                                   |
 | **Execution** | WebContainer API, xterm.js                                  |
 | **UI**        | shadcn/ui, Radix UI                                         |
@@ -91,7 +91,7 @@ Turbo is a browser-based IDE inspired by Cursor AI, featuring:
   - [Clerk](https://cwa.run/clerk) - Authentication
   - [Convex](https://cwa.run/convex) - Database
   - [Inngest](https://cwa.run/inngest) - Background jobs
-  - [Anthropic](https://anthropic.com) or [Google AI Studio](https://aistudio.google.com) - AI API (one required)
+  - [Google AI Studio](https://aistudio.google.com) - AI API key required
   - [Firecrawl](https://cwa.run/firecrawl) - Web scraping (optional)
   - [Sentry](https://cwa.run/sentry) - Error tracking (optional)
 
@@ -126,11 +126,10 @@ Turbo is a browser-based IDE inspired by Cursor AI, featuring:
    # Convex
    NEXT_PUBLIC_CONVEX_URL=
    CONVEX_DEPLOYMENT=
-   POLARIS_CONVEX_INTERNAL_KEY=  # Generate a random string
+   TURBO_CONVEX_INTERNAL_KEY=  # Generate a random string
 
-   # AI Provider (choose one)
-   ANTHROPIC_API_KEY=        # Preferred - Claude Sonnet 4
-   GOOGLE_GENERATIVE_AI_API_KEY=  # Free alternative - Gemini 2.0 Flash
+   # Chat, website generation, autocomplete, and quick edit
+   GOOGLE_GENERATIVE_AI_API_KEY=  # Required - Gemini 3.6 Flash / 3.5 Flash-Lite
 
    # Firecrawl (optional)
    FIRECRAWL_API_KEY=

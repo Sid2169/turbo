@@ -1,4 +1,4 @@
-import ky from "ky";
+import ky, { HTTPError } from "ky";
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -38,7 +38,10 @@ export const fetcher = async (
     if (error instanceof Error && error.name === "AbortError") {
       return null;
     }
-    toast.error("Failed to fetch AI quick edit");
+    const body = error instanceof HTTPError
+      ? await error.response.json().catch(() => null) as { error?: string } | null
+      : null;
+    toast.error(body?.error || "Failed to fetch AI quick edit");
     return null;
   }
 };

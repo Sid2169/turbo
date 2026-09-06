@@ -3,10 +3,10 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 const validateInternalKey = (key: string) => {
-  const internalKey = process.env.POLARIS_CONVEX_INTERNAL_KEY;
+  const internalKey = process.env.TURBO_CONVEX_INTERNAL_KEY;
 
   if (!internalKey) {
-    throw new Error("POLARIS_CONVEX_INTERNAL_KEY is not configured");
+    throw new Error("TURBO_CONVEX_INTERNAL_KEY is not configured");
   }
 
   if (key !== internalKey) {
@@ -74,6 +74,21 @@ export const updateMessageContent = mutation({
       content: args.content,
       status: "completed" as const,
     });
+  },
+});
+
+export const updateMessageProgress = mutation({
+  args: {
+    internalKey: v.string(),
+    messageId: v.id("messages"),
+    content: v.string(),
+  },
+  handler: async (ctx, args) => {
+    validateInternalKey(args.internalKey);
+    const message = await ctx.db.get(args.messageId);
+    // A replayed progress step must not overwrite completion or cancellation.
+    if (message?.status !== "processing") return;
+    await ctx.db.patch(args.messageId, { content: args.content });
   },
 });
 

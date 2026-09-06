@@ -1,8 +1,7 @@
 import { z } from "zod";
-import { generateText, Output } from "ai";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { anthropic } from "@ai-sdk/anthropic";
+import { generateEditorResult, getEditorError } from "@/lib/editor-ai";
 
 import { firecrawl } from "@/lib/firecrawl";
 
@@ -69,7 +68,7 @@ export async function POST(request: Request) {
     const urls: string[] = instruction.match(URL_REGEX) || [];
     let documentationContext = "";
 
-    if (urls.length > 0) {
+    if (urls.length > 0 && process.env.FIRECRAWL_API_KEY) {
       const scrapedResults = await Promise.all(
         urls.map(async (url) => {
           try {
@@ -101,18 +100,20 @@ export async function POST(request: Request) {
       .replace("{instruction}", instruction)
       .replace("{documentation}", documentationContext);
 
-    const { output } = await generateText({
-      model: anthropic("claude-3-7-sonnet-20250219"),
-      output: Output.object({ schema: quickEditSchema }),
+    const output = await generateEditorResult({
+      schema: quickEditSchema,
+      purpose: "edit",
+      signal: request.signal,
       prompt,
     });
 
     return NextResponse.json({ editedCode: output.editedCode });
   } catch (error) {
-    console.error("Edit error:", error);
+    const failure = getEditorError(error);
+    console.error("Edit error:", failure.error);
     return NextResponse.json(
-      { error: "Failed to generate edit" },
-      { status: 500 }
+      { error: failure.error },
+      { status: failure.status }
     );
   }
 };

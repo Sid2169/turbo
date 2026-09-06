@@ -1,9 +1,7 @@
-import { generateText, Output } from "ai";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { anthropic } from "@ai-sdk/anthropic";
-// import { google } from "@ai-sdk/google";
+import { generateEditorResult, getEditorError } from "@/lib/editor-ai";
 
 const suggestionSchema = z.object({
   suggestion: z
@@ -82,18 +80,20 @@ export async function POST(request: Request) {
       .replace("{nextLines}", nextLines || "")
       .replace("{lineNumber}", lineNumber.toString());
 
-    const { output } = await generateText({
-      model: anthropic("claude-3-7-sonnet-20250219"),
-      output: Output.object({ schema: suggestionSchema }),
+    const output = await generateEditorResult({
+      schema: suggestionSchema,
+      purpose: "suggestion",
+      signal: request.signal,
       prompt,
     });
 
     return NextResponse.json({ suggestion: output.suggestion })
   } catch (error) {
-    console.error("Suggestion error: ", error);
+    const failure = getEditorError(error);
+    console.error("Suggestion error:", failure.error);
     return NextResponse.json(
-      { error: "Failed to generate suggestion" },
-      { status: 500 },
+      { error: failure.error },
+      { status: failure.status },
     );
   }
 }
