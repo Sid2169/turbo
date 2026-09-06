@@ -220,16 +220,13 @@ convex/
 - Optimistic UI updates
 - Background job processing with Inngest
 
-## Current Limitations (Part 1)
+## Features Implemented (Part 2)
 
-These features are planned for Part 2:
-
-- AI agent cannot yet modify files (mock response only)
-- No message cancellation
-- No past conversations dialog
-- No code preview/execution
-- No GitHub integration
-- No AI project generation
+- AI agent with file management tools (create, read, update files)
+- In-browser code preview and execution with WebContainer
+- Static site and nested package.json project support
+- GitHub import & export
+- AI project generation from a prompt
 
 ## Scripts
 
