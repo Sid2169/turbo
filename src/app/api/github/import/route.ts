@@ -37,8 +37,6 @@ export async function POST(request: Request) {
   const { url } = requestSchema.parse(body);
 
   const { owner, repo } = parseGitHubUrl(url);
-  // https://github.com/AntonioErdeljac/cursor-dev
-  // { owner: "AntonioErdeljac", repo: "cursor-dev" }
 
   const client = await clerkClient();
   const tokens = await client.users.getUserOauthAccessToken(

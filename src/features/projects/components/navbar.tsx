@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState } from "react";
 import { CloudCheckIcon, LoaderIcon } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
@@ -83,11 +82,10 @@ export const Navbar = ({
                   asChild
                 >
                   <Link href="/">
-                    <Image
+                    <img
                       src="/logo.svg"
-                      alt="Logo"
-                      width={20}
-                      height={20}
+                      alt="Turbo"
+                      className="size-5"
                     />
                     <span
                       className={cn(
@@ -95,7 +93,7 @@ export const Navbar = ({
                         font.className,
                       )}
                     >
-                      Polaris
+                      Turbo
                     </span>
                   </Link>
                 </Button>

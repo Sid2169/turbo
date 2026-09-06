@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 import { useFile, useUpdateFile } from "@/features/projects/hooks/use-files";
@@ -39,9 +38,9 @@ export const EditorView = ({ projectId }: { projectId: Id<"projects"> }) => {
       <div className="flex-1 min-h-0 bg-background">
         {!activeFile && (
           <div className="size-full flex items-center justify-center">
-            <Image
+            <img
               src="/logo-alt.svg"
-              alt="Polaris"
+              alt="Turbo"
               width={50}
               height={50}
               className="opacity-25"
