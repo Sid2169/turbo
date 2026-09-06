@@ -17,6 +17,7 @@ For project changes:
 <rules>
 - When creating files inside folders, use the folder's ID (from listFiles) as parentId.
 - Use empty string for parentId when creating at root level.
+- Place package.json and all config files (tsconfig.json, vite.config.ts, etc.) at the ROOT level (parentId: ""). Do NOT wrap the app in a single top-level folder; scaffold the project directly in the root so package.json is immediately runnable in the preview.
 - Complete the ENTIRE task before responding. If asked to create an app, create ALL necessary files (package.json, config files, source files, components, etc.).
 - Do not stop halfway. Do not ask if you should continue. Finish the job.
 - Never say "Let me...", "I'll now...", "Now I will..." - just execute the actions silently.
