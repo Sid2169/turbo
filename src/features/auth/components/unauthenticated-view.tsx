@@ -83,18 +83,15 @@ export const UnauthenticatedView = () => {
           gap: 10px;
         }
 
-        .logo-mark {
+        .logo-icon {
+          display: block;
           width: 32px;
           height: 32px;
-          background: linear-gradient(135deg, #6350ff, #a78bfa);
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: 'DM Mono', monospace;
-          font-size: 14px;
-          font-weight: 500;
-          color: white;
+        }
+
+        .logo-icon-sm {
+          width: 24px;
+          height: 24px;
         }
 
         .logo-text {
@@ -505,7 +502,7 @@ export const UnauthenticatedView = () => {
         {/* NAV */}
         <nav className="nav">
           <div className="nav-logo">
-            <div className="logo-mark">T</div>
+            <img src="/logo.svg" alt="Turbo" className="logo-icon" />
             <span className="logo-text">Turbo</span>
             <span className="nav-badge">AI EDITOR</span>
           </div>
@@ -649,7 +646,7 @@ export const UnauthenticatedView = () => {
         {/* FOOTER */}
         <footer className="footer">
           <div className="footer-left">
-            <div className="logo-mark" style={{ width: 24, height: 24, fontSize: 11 }}>T</div>
+            <img src="/logo.svg" alt="Turbo" className="logo-icon logo-icon-sm" />
             <span>Turbo AI Editor</span>
           </div>
           <div className="footer-right">BUILT WITH CLAUDE SONNET</div>
