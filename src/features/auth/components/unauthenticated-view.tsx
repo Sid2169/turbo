@@ -12,7 +12,7 @@ export const UnauthenticatedView = () => {
         .landing-root {
           min-height: 100vh;
           background: #0a0a0f;
-          color: #e8e6f0;
+          color: #f0ece4;
           font-family: 'Syne', sans-serif;
           overflow-x: hidden;
           position: relative;
@@ -22,8 +22,8 @@ export const UnauthenticatedView = () => {
           position: fixed;
           inset: 0;
           background-image:
-            linear-gradient(rgba(99, 80, 255, 0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(99, 80, 255, 0.04) 1px, transparent 1px);
+            linear-gradient(rgba(244, 91, 22, 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(244, 91, 22, 0.04) 1px, transparent 1px);
           background-size: 60px 60px;
           pointer-events: none;
           z-index: 0;
@@ -50,7 +50,7 @@ export const UnauthenticatedView = () => {
         .glow-1 {
           width: 600px;
           height: 600px;
-          background: rgba(99, 80, 255, 0.12);
+          background: rgba(244, 91, 22, 0.12);
           top: -200px;
           right: -100px;
         }
@@ -58,7 +58,7 @@ export const UnauthenticatedView = () => {
         .glow-2 {
           width: 400px;
           height: 400px;
-          background: rgba(0, 200, 160, 0.08);
+          background: rgba(64, 205, 255, 0.08);
           bottom: 100px;
           left: -100px;
         }
@@ -98,15 +98,15 @@ export const UnauthenticatedView = () => {
           font-size: 16px;
           font-weight: 700;
           letter-spacing: -0.02em;
-          color: #f0eeff;
+          color: #f5efe5;
         }
 
         .nav-badge {
           font-family: 'DM Mono', monospace;
           font-size: 10px;
-          background: rgba(99, 80, 255, 0.15);
-          border: 1px solid rgba(99, 80, 255, 0.3);
-          color: #a78bfa;
+          background: rgba(244, 91, 22, 0.15);
+          border: 1px solid rgba(244, 91, 22, 0.3);
+          color: #FFA35C;
           padding: 3px 8px;
           border-radius: 20px;
           letter-spacing: 0.08em;
@@ -115,7 +115,7 @@ export const UnauthenticatedView = () => {
         .nav-sign-in button {
           background: rgba(255,255,255,0.05) !important;
           border: 1px solid rgba(255,255,255,0.12) !important;
-          color: #c4c0d8 !important;
+          color: #c4b8a8 !important;
           padding: 8px 20px !important;
           border-radius: 8px !important;
           font-family: 'Syne', sans-serif !important;
@@ -126,9 +126,9 @@ export const UnauthenticatedView = () => {
         }
 
         .nav-sign-in button:hover {
-          background: rgba(99, 80, 255, 0.15) !important;
-          border-color: rgba(99, 80, 255, 0.4) !important;
-          color: #f0eeff !important;
+          background: rgba(244, 91, 22, 0.15) !important;
+          border-color: rgba(244, 91, 22, 0.4) !important;
+          color: #f5efe5 !important;
         }
 
         /* HERO */
@@ -146,13 +146,13 @@ export const UnauthenticatedView = () => {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: rgba(99, 80, 255, 0.1);
-          border: 1px solid rgba(99, 80, 255, 0.25);
+          background: rgba(244, 91, 22, 0.1);
+          border: 1px solid rgba(244, 91, 22, 0.25);
           border-radius: 20px;
           padding: 6px 14px;
           font-family: 'DM Mono', monospace;
           font-size: 11px;
-          color: #a78bfa;
+          color: #FFA35C;
           letter-spacing: 0.06em;
           margin-bottom: 40px;
         }
@@ -160,7 +160,7 @@ export const UnauthenticatedView = () => {
         .pill-dot {
           width: 6px;
           height: 6px;
-          background: #6350ff;
+          background: #F45B16;
           border-radius: 50%;
           animation: pulse-dot 2s ease-in-out infinite;
         }
@@ -176,11 +176,11 @@ export const UnauthenticatedView = () => {
           line-height: 1.0;
           letter-spacing: -0.04em;
           margin: 0 0 24px;
-          color: #f0eeff;
+          color: #f5efe5;
         }
 
         .hero h1 .accent {
-          background: linear-gradient(135deg, #a78bfa 0%, #6350ff 50%, #38bdf8 100%);
+          background: linear-gradient(135deg, #FFA35C 0%, #F45B16 50%, #40CDFF 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -189,7 +189,7 @@ export const UnauthenticatedView = () => {
         .hero-sub {
           font-size: 18px;
           line-height: 1.7;
-          color: #8884a8;
+          color: #9a8e7e;
           max-width: 520px;
           margin: 0 0 48px;
           font-weight: 400;
@@ -203,7 +203,7 @@ export const UnauthenticatedView = () => {
         }
 
         .cta-primary button {
-          background: linear-gradient(135deg, #6350ff, #8b73ff) !important;
+          background: linear-gradient(135deg, #F45B16, #F66A19) !important;
           border: none !important;
           color: white !important;
           padding: 14px 32px !important;
@@ -213,12 +213,12 @@ export const UnauthenticatedView = () => {
           font-weight: 600 !important;
           cursor: pointer !important;
           transition: all 0.2s !important;
-          box-shadow: 0 0 40px rgba(99, 80, 255, 0.3) !important;
+          box-shadow: 0 0 40px rgba(244, 91, 22, 0.3) !important;
         }
 
         .cta-primary button:hover {
           transform: translateY(-1px) !important;
-          box-shadow: 0 0 60px rgba(99, 80, 255, 0.45) !important;
+          box-shadow: 0 0 60px rgba(244, 91, 22, 0.45) !important;
         }
 
         /* EDITOR PREVIEW */
@@ -233,7 +233,7 @@ export const UnauthenticatedView = () => {
           border: 1px solid rgba(255,255,255,0.08);
           border-radius: 16px;
           overflow: hidden;
-          box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,80,255,0.1);
+          box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(244,91,22,0.1);
         }
 
         .editor-titlebar {
@@ -270,13 +270,13 @@ export const UnauthenticatedView = () => {
         .tab {
           padding: 4px 14px;
           border-radius: 6px 6px 0 0;
-          color: #554f80;
+          color: #6b5a4a;
         }
 
         .tab.active {
-          background: rgba(99, 80, 255, 0.12);
-          color: #a78bfa;
-          border: 1px solid rgba(99, 80, 255, 0.2);
+          background: rgba(244, 91, 22, 0.12);
+          color: #FFA35C;
+          border: 1px solid rgba(244, 91, 22, 0.2);
           border-bottom: none;
         }
 
@@ -296,7 +296,7 @@ export const UnauthenticatedView = () => {
 
         .tree-item {
           padding: 4px 16px;
-          color: #554f80;
+          color: #6b5a4a;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -304,9 +304,9 @@ export const UnauthenticatedView = () => {
           transition: color 0.15s;
         }
 
-        .tree-item:hover { color: #8884a8; }
-        .tree-item.active { color: #a78bfa; background: rgba(99,80,255,0.08); }
-        .tree-folder { color: #6350ff; font-size: 10px; }
+        .tree-item:hover { color: #9a8e7e; }
+        .tree-item.active { color: #FFA35C; background: rgba(244,91,22,0.08); }
+        .tree-folder { color: #F45B16; font-size: 10px; }
         .tree-indent { padding-left: 28px; }
 
         .code-area {
@@ -318,14 +318,14 @@ export const UnauthenticatedView = () => {
         }
 
         .line { display: flex; gap: 20px; }
-        .ln { color: #2d2a4a; min-width: 20px; text-align: right; user-select: none; }
-        .kw { color: #a78bfa; }
-        .fn { color: #38bdf8; }
+        .ln { color: #362e28; min-width: 20px; text-align: right; user-select: none; }
+        .kw { color: #FFA35C; }
+        .fn { color: #40CDFF; }
         .str { color: #34d399; }
-        .cmt { color: #3d3a5c; }
-        .var { color: #f0eeff; }
+        .cmt { color: #4a3d35; }
+        .var { color: #f5efe5; }
         .num { color: #fb923c; }
-        .ghost { color: #3d3a5c; font-style: italic; }
+        .ghost { color: #4a3d35; font-style: italic; }
 
         .ai-panel {
           background: #0d0d14;
@@ -338,7 +338,7 @@ export const UnauthenticatedView = () => {
           padding: 12px 16px;
           border-bottom: 1px solid rgba(255,255,255,0.04);
           font-size: 11px;
-          color: #554f80;
+          color: #6b5a4a;
           font-family: 'DM Mono', monospace;
           display: flex;
           align-items: center;
@@ -348,7 +348,7 @@ export const UnauthenticatedView = () => {
         .ai-dot {
           width: 6px;
           height: 6px;
-          background: #6350ff;
+          background: #F45B16;
           border-radius: 50%;
         }
 
@@ -369,9 +369,9 @@ export const UnauthenticatedView = () => {
         }
 
         .ai-msg.user {
-          background: rgba(99,80,255,0.12);
-          border: 1px solid rgba(99,80,255,0.2);
-          color: #c4c0d8;
+          background: rgba(244,91,22,0.12);
+          border: 1px solid rgba(244,91,22,0.2);
+          color: #c4b8a8;
           align-self: flex-end;
           max-width: 90%;
         }
@@ -379,7 +379,7 @@ export const UnauthenticatedView = () => {
         .ai-msg.assistant {
           background: rgba(255,255,255,0.03);
           border: 1px solid rgba(255,255,255,0.06);
-          color: #8884a8;
+          color: #9a8e7e;
           max-width: 95%;
         }
 
@@ -393,7 +393,7 @@ export const UnauthenticatedView = () => {
         .section-label {
           font-family: 'DM Mono', monospace;
           font-size: 11px;
-          color: #6350ff;
+          color: #F45B16;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           margin-bottom: 16px;
@@ -403,7 +403,7 @@ export const UnauthenticatedView = () => {
           font-size: 36px;
           font-weight: 700;
           letter-spacing: -0.03em;
-          color: #f0eeff;
+          color: #f5efe5;
           margin-bottom: 48px;
           line-height: 1.15;
         }
@@ -423,16 +423,16 @@ export const UnauthenticatedView = () => {
         }
 
         .feature-card:hover {
-          background: rgba(99,80,255,0.05);
-          border-color: rgba(99,80,255,0.2);
+          background: rgba(244,91,22,0.05);
+          border-color: rgba(244,91,22,0.2);
           transform: translateY(-2px);
         }
 
         .feature-icon {
           width: 36px;
           height: 36px;
-          background: rgba(99,80,255,0.12);
-          border: 1px solid rgba(99,80,255,0.2);
+          background: rgba(244,91,22,0.12);
+          border: 1px solid rgba(244,91,22,0.2);
           border-radius: 8px;
           display: flex;
           align-items: center;
@@ -444,7 +444,7 @@ export const UnauthenticatedView = () => {
         .feature-card h3 {
           font-size: 15px;
           font-weight: 600;
-          color: #e8e6f0;
+          color: #f0ece4;
           margin: 0 0 8px;
           letter-spacing: -0.01em;
         }
@@ -454,7 +454,7 @@ export const UnauthenticatedView = () => {
           color: #6664858;
           line-height: 1.6;
           margin: 0;
-          color: #554f80;
+          color: #6b5a4a;
         }
 
         /* FOOTER */
@@ -471,13 +471,13 @@ export const UnauthenticatedView = () => {
           align-items: center;
           gap: 10px;
           font-size: 13px;
-          color: #3d3a5c;
+          color: #4a3d35;
         }
 
         .footer-right {
           font-family: 'DM Mono', monospace;
           font-size: 11px;
-          color: #3d3a5c;
+          color: #4a3d35;
         }
 
         @media (max-width: 768px) {
