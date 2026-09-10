@@ -25,6 +25,8 @@
 
 ![Home Page View](homePage.png)
 
+<video controls width="100%" height="auto" src="demo.webm"></video>
+
 [Live Demo](https://turbo-navy-iota.vercel.app/) • [Report Bug](https://github.com/Sid2169/turbo/issues) • [Request Feature](https://github.com/Sid2169/turbo/issues)
 
 
