@@ -30,205 +30,240 @@
 [Live Demo](https://turbo-navy-iota.vercel.app/) • [Report Bug](https://github.com/Sid2169/turbo/issues) • [Request Feature](https://github.com/Sid2169/turbo/issues)
 
 
-# Turbo - A Cursor AI Alternative
- 
-Turbo is a browser-based IDE inspired by Cursor AI, featuring:
+# Turbo — AI-Powered Browser IDE
 
-- Real-time collaborative code editing
-- AI-powered code suggestions and quick edit (Cmd+K)
-- Conversation-based AI assistant
-- In-browser code execution with WebContainer
-- GitHub import/export integration
-- Multi-file project management
+Turbo is a browser-based IDE in the spirit of Cursor. The entire editor, AI assistant, and optionally a live code preview run in your browser — no local installs, no sandbox servers to provision. It is currently a working **single-user prototype**: the real-time data layer, agent, and preview are all functional end-to-end, but a handful of gaps that would make it a production daily-driver are still planned (see [Roadmap](#roadmap)).
 
-## Tech Stack
+## What Turbo does today
 
-| Category      | Technologies                                                |
-| ------------- | ----------------------------------------------------------- |
-| **Frontend**  | Next.js 16, React 19, TypeScript, Tailwind CSS 4            |
-| **Editor**    | CodeMirror 6, Custom Extensions, One Dark Theme             |
-| **Backend**   | Convex (Real-time DB), Inngest (Background Jobs)            |
-| **AI**        | Gemini 3.6 Flash (chat and edits), Gemini 3.5 Flash-Lite (autocomplete) |
-| **Auth**      | Clerk (with GitHub OAuth)                                   |
-| **Execution** | WebContainer API, xterm.js                                  |
-| **UI**        | shadcn/ui, Radix UI                                         |
+- **Code editor** (CodeMirror 6) with line numbers, code folding, bracket matching, multi-cursor / rectangular selection, a minimap, indentation markers and VSCode-style file icons. Syntax highlighting for JavaScript, TypeScript, JSX/TSX, HTML, CSS, JSON, Markdown and Python.
+- **Tabbed multi-file workspace** per project — pinned vs. preview tabs, breadcrumbs, and debounced auto-save (1.5s) that persists every keystroke.
+- **Editor AI**:
+  - *Ghost-text autocomplete* — inline suggestions after the cursor (300ms debounce, aborted the moment you type again, Tab to accept).
+  - *Quick edit* (`⌘/Ctrl+K`) — select a block of code, describe the change, and it is rewritten in place. Include a URL and it can be scraped (Firecrawl) for live documentation context.
+- **Conversation & coding agent** — a sidebar chat with markdown rendering, processing/cancel states, and an AgentKit-powered agent with file tools (`list`, `read`, `create`, `update`, `rename`, `delete`, batch create, URL scraping) that scaffolds or modifies the project from natural language.
+- **Prompt-to-project** — describe an app and Turbo generates a name, creates the project + conversation, and the agent scaffolds the codebase.
+- **Live preview (WebContainer)** — boots a real Node.js environment *in the browser*: `npm install`, runs your dev command, streams output to a terminal (xterm), hot-syncs file edits into the running sandbox, and renders the app in an iframe. Works for static sites without a `package.json` and nested `package.json` projects; install/dev commands are configurable per project.
+- **GitHub import & export** — import a repo by URL (text and binary files, folder hierarchy preserved) or export a project to a new GitHub repo. Binary files are stored separately in Convex file storage.
+- **Auth** — Clerk sessions, GitHub OAuth via Clerk, Pro-plan gating for import/export.
 
-## Part 1 Contents (Steps 1-12)
+## Architecture
 
-### Phase 1: Foundation & Technologies
+The system splits cleanly into a **real-time data plane** and a **durable background plane**, joined by a small authenticated API layer.
 
-- **Step 1:** Project Setup, UI Library & Theme
-- **Step 2:** Clerk Authentication & Protected Routes
-- **Step 3:** Convex Database & Real-time Setup
-- **Step 4:** Inngest - Background Jobs & Non-Blocking UI
-- **Step 5:** Firecrawl - Teaching AI with Live Documentation
-- **Step 6:** Sentry - Error Tracking & LLM Monitoring
-- **Step 7:** Projects Dashboard & Landing Page
+```mermaid
+flowchart LR
+  subgraph Browser
+    E[CodeMirror editor + ghost text / quick edit]
+    C[Conversation sidebar]
+    W[WebContainer preview + terminal]
+  end
 
-### Phase 2: File System & Editor
+  subgraph "Data plane (Convex)"
+    DB[(projects, files, conversations, messages)]
+    RT[Real-time subscriptions]
+  end
 
-- **Step 8:** Project IDE Layout & Resizable Panes
-- **Step 9:** File Explorer - Full Implementation
-- **Step 10:** Code Editor & State Management
+  subgraph "API layer (Next.js routes)"
+    A1[/api/suggestion/]
+    A2[/api/quick-edit/]
+    A3[/api/messages/]
+    A4[/api/github/*/]
+  end
 
-### Phase 3: AI Features (Partial)
+  subgraph "Background plane (Inngest + AgentKit)"
+    AG[process-message agent]
+    IM[import-github-repo]
+    EX[export-to-github]
+  end
 
-- **Step 11:** AI Suggestions & Quick Edit
-- **Step 12:** Conversation System
+  G[(Gemini)]
+  F[(Firecrawl)]
+  H[(GitHub)] 
 
-## Part 2 Contents (Steps 13-16)
+  E --> A1 --> G
+  E --> A2 --> F
+  A2 --> G
+  C --> A3 --> AG --> DB
+  AG --> G
+  AG --> F
+  A4 --> IM --> DB & H
+  A4 --> EX --> DB & H
+  E <--> RT
+  C <--> RT
+  W --> DB
+  style RT fill:#2b2b33
+  style AG fill:#2b2b33
+  style IM fill:#2b2b33
+  style EX fill:#2b2b33
+```
 
-- **Step 13:** AI Agent & Tools (AgentKit, file management tools)
-- **Step 14:** WebContainer, Terminal & Preview
-- **Step 15:** GitHub Import & Export
-- **Step 16:** AI Project Creation & Final Polish
+### Data plane — Convex
 
-## Getting Started
+- **Convex is the single source of truth.** Projects, files, conversations and messages live in a reactive database the browser subscribes to directly (`useQuery`/`useMutation`).
+- **Files use a flat parent-id tree** (adjacency list). Text files store `content` inline; **binary files are stored in Convex file storage** (`storageId`) so large imports never bloat documents.
+- **Optimistic updates everywhere** — creating/renaming folders, files and projects updates the local query cache instantly; the server reconciles.
+- **Editor autosave** writes to Convex on a 1.5s debounce; the running WebContainer hot-syncs from the same live subscriptions.
+
+### Background plane — Inngest + AgentKit
+
+Long-running, multi-step work runs as **durable Inngest functions** so retries and step-replays are safe:
+
+- `process-message` — the coding agent loop (`@inngest/agent-kit`), with file tools, cancellable via `message/cancel`.
+- `import-github-repo` / `export-to-github` — Octokit-based, with explicit import/export status on the project row, cancellation, and binary vs. text handling.
+
+Durable steps make the chat feel alive: the agent writes progress into the message document (`"Working on your request…"`, `"Working on your project (step N)…"`) which the browser renders via the live subscription.
+
+### The internal API boundary
+
+Background jobs have no user session, and API routes need to verify auth *before* touching data. So Realtime routes (`src/app/api/*`) enforce Clerk auth + plan checks, then call an **internal Convex API** (`convex/system.ts`) gated by a shared `TURBO_CONVEX_INTERNAL_KEY`. User identity flows along as an `ownerId` in the job payload.
+
+### AI layer
+
+- **Editor AI uses structured outputs** (Vercel AI SDK `generateText` + zod `Output.object`) so suggestions and edits come back as validated JSON — no brittle parsing.
+- **Model routing**: a lighter model (`gemini-3.5-flash-lite`) for inline suggestions (short, fast, 8s deadline) and a stronger one (`gemini-3.6-flash`) for edits and the agent (25s deadline / long outputs).
+- **Guardrails**: hard `AbortSignal` timeouts, zero retries on quota/rate limits, and every provider error mapped to a safe user-facing message — no prompts or keys leak.
+- **Conversation agent** gets the last 10 messages plus chat title context, and calls tools to keep the file tree in sync with Convex.
+
+### Preview — WebContainer
+
+Fully client-side, no server sandboxing: a singleton `WebContainer` boots with `coep: "credentialless"` (COEP/COOP headers set in `next.config.ts`), the project file tree is mounted from Convex, and file changes are **hot-written into the running container**. Root detection finds the deepest `package.json`; static sites get an injected dependency-free Node file server.
+
+### Auth
+
+Clerk is the single identity source: its JWT is forwarded to Convex (verified in `convex/auth.config.ts`, identity = `identity.subject`), GitHub OAuth tokens are fetched server-side via `clerkClient`, and `has({ plan: "pro" })` gates GitHub import/export. `src/proxy.ts` is the Clerk middleware.
+
+## Key decisions & why
+
+1. **CodeMirror 6 over a desktop-weight editor** — modular, small, and deeply extensible. Ghost text, quick edit, the minimap and markers are all plain extensions; the editor core stays tiny.
+2. **Convex for all interactive data** — real-time subscriptions and optimistic updates out of the box, a typed schema, and no custom WebSocket/proxy infra to operate.
+3. **Inngest for everything long-running** — the agent loop and GitHub jobs are *durable*: retries, step replays, and cancellation (`message/cancel`, `github/export.cancel`) for free, keeping API routes non-blocking and fast.
+4. **Internal-key-gated Convex "system API"** — background jobs and API routes share access to Convex without user JWTs; auth and plan checks happen once at the API boundary instead of being re-implemented inside every job.
+5. **"Streaming by progress" instead of SSE** — the chat doesn't hold a token stream open. The agent mutates a `processing` message in Convex step-by-step and the subscription renders it live. This is durable and replay-safe, and avoids fragile long-lived streams.
+6. **Replay-safe Gemini tool calls** — AgentKit flattens signed Gemini responses, so `restoreGeminiHistory` rebuilds the original signed tool-call turns after step replays (never fabricating Google thought signatures).
+7. **Snappy-to-type AI** — debounced, abort-on-typing autocomplete with strict deadlines keeps ghost text out of your way; structured outputs and zero-quota-retries bound cost and failure modes.
+8. **Text vs. binary schema split** — text inline for searching/streaming, binaries in file storage so repo imports stay light.
+9. **Singleton client-side WebContainer** — credentialless COEP boot plus hot file-sync keeps the preview honest to edits with zero sandbox infrastructure.
+
+## Current limitations
+
+Honest state of the build today:
+
+- **Single-user.** Edits are real-time *persisted*, not real-time *collaborative* — no presence, cursors, or shared sessions between people.
+- **Chat is progress-batched**, not token-by-token streaming (the assistant message updates in chunks).
+- **Autocomplete is cursor-context only** — it has no project-wide understanding/embeddings, so suggestions are "screen-native" rather than repo-native.
+- **No global search / find-across-files**, and the language set is capped at six languages.
+- **No in-app git UX** (status, diff, commit) — only push/pull via GitHub import/export.
+- **"Add to chat"** from the selection tooltip is a visible but unwired placeholder.
+- **Binary files** are stored but not viewable or editable in the editor.
+- **No local-first/offline** mode.
+
+## Roadmap
+
+This is the plan to take Turbo from prototype to something a real developer (read: me) would reach for daily. Ordered by impact.
+
+### Phase 1 — dependable solo daily driver
+- **True token streaming for chat** with model routing (fast code model vs. reasoning model), plus rich project context assembled by the agent before it answers.
+- **Repo-aware autocomplete** — a lightweight per-project embedding index so inline suggestions draw on the actual codebase, not just the open buffer.
+- **Project-wide navigation**: `⌘/Ctrl+P` go-to-file, `⌘/Ctrl+Shift+F` search & replace across files, symbol/outline view.
+- **Terminal as a first-class workspace tab** with per-project command templates (`build`, `test`, `lint`), and preview sessions that survive remounts.
+- **Git UX inside the IDE**: status, AI-written commit messages, and a diff view — closing the loop with the existing GitHub export.
+- **Wire up "Add to chat"** (and drag code) so selections become context for the agent.
+- **Project templates & workspaces** — deterministic scaffolding and true nested-`package.json` (monorepo) support.
+
+### Phase 2 — reliability & feel
+- **Presence and collaborative cursors** (Convex presence) for shared sessions.
+- **Local-first caching and virtualized file trees** so large repos open fast.
+- **Inline diagnostics** via `@codemirror/lint` (LSP/type information) and one-click "fix with AI".
+- **Binary previews** (images/PDF) and drag-and-drop uploads.
+- **Settings panel, custom keymaps, and persistent layout.**
+
+### Phase 3 — stretch
+- Offline mode with local persistence and sync-back.
+- WASM-based LSPs; adding Anthropic/OpenAI models (deps already present); sandboxed extension system.
+
+## Getting started
 
 ### Prerequisites
 
-- Node.js 20.09+
-- npm or pnpm
-- Accounts needed:
-  - [Clerk](https://cwa.run/clerk) - Authentication
-  - [Convex](https://cwa.run/convex) - Database
-  - [Inngest](https://cwa.run/inngest) - Background jobs
-  - [Google AI Studio](https://aistudio.google.com) - AI API key required
-  - [Firecrawl](https://cwa.run/firecrawl) - Web scraping (optional)
-  - [Sentry](https://cwa.run/sentry) - Error tracking (optional)
+- Node.js 20.9+
+- npm
+- Accounts / keys for:
+  - **[Clerk](https://cwa.run/clerk)** — authentication (JWT issuer + OAuth)
+  - **[Convex](https://cwa.run/convex)** — database
+  - **[Inngest](https://cwa.run/inngest)** — background jobs (dev mode works locally)
+  - **[Google AI Studio](https://aistudio.google.com)** — `GOOGLE_GENERATIVE_AI_API_KEY` (required)
+  - **[Firecrawl](https://cwa.run/firecrawl)** — URL scraping (optional)
+  - **[Sentry](https://cwa.run/sentry)** — error tracking (optional)
 
-### Installation
+### Setup
 
-1. Clone the repository:
+1. Clone the repository and install dependencies:
 
    ```bash
    git clone https://github.com/Sid2169/turbo.git
    cd turbo
-   ```
-
-2. Install dependencies:
-
-   ```bash
    npm install
    ```
 
-3. Set up environment variables:
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-4. Configure your `.env.local` with the required keys:
+2. Create `.env.local` (no `.env.example` is committed — keep it local) with the keys:
 
    ```env
    # Clerk
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
    CLERK_SECRET_KEY=
+   CLERK_JWT_ISSUER_DOMAIN=
 
    # Convex
    NEXT_PUBLIC_CONVEX_URL=
    CONVEX_DEPLOYMENT=
-   TURBO_CONVEX_INTERNAL_KEY=  # Generate a random string
+   TURBO_CONVEX_INTERNAL_KEY=   # Generate a random string (used by the internal API)
 
-   # Chat, website generation, autocomplete, and quick edit
-   GOOGLE_GENERATIVE_AI_API_KEY=  # Required - Gemini 3.6 Flash / 3.5 Flash-Lite
+   # Required — Gemini (chat, project generation, autocomplete, quick edit)
+   GOOGLE_GENERATIVE_AI_API_KEY=
 
-   # Firecrawl (optional)
+   # Optional
    FIRECRAWL_API_KEY=
-
-   # Sentry (optional)
    SENTRY_DSN=
    ```
 
-5. Start the Convex development server:
+3. Start the three dev servers:
 
    ```bash
-   npx convex dev
+   npx convex dev            # Terminal 1 — database
+   npm run dev               # Terminal 2 — Next.js (http://localhost:3000)
+   npx inngest-cli@latest dev  # Terminal 3 — background jobs
    ```
 
-6. In a new terminal, start the Next.js development server:
+4. Open [http://localhost:3000](http://localhost:3000).
 
-   ```bash
-   npm run dev
-   ```
-
-7. In another terminal, start the Inngest dev server:
-
-   ```bash
-   npx inngest-cli@latest dev
-   ```
-
-8. Open [http://localhost:3000](http://localhost:3000)
-
-## Project Structure
+## Project structure
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── api/               # API routes
-│   │   ├── messages/      # Conversation API
-│   │   ├── suggestion/    # AI suggestions
-│   │   └── quick-edit/    # Cmd+K editing
-│   └── projects/          # Project pages
-├── components/            # Shared components
-│   ├── ui/               # shadcn/ui components
-│   └── ai-elements/      # AI conversation components
+├── app/                     # Next.js App Router
+│   ├── api/                 # Realtime API layer (Clerk auth)
+│   │   ├── messages/        #   Chat dispatch + cancel
+│   │   ├── suggestion/      #   Ghost-text autocomplete
+│   │   ├── quick-edit/      #   ⌘K edit
+│   │   ├── github/*/        #   Import / export
+│   │   └── projects/        #   Prompt-to-project
+│   └── projects/            # Project pages
+├── components/              # Shared UI (shadcn/ui + ai-elements)
 ├── features/
-│   ├── auth/             # Authentication
-│   ├── conversations/    # AI chat system
-│   ├── editor/           # CodeMirror setup
-│   │   └── extensions/   # Custom extensions
-│   ├── preview/          # WebContainer (Part 2)
-│   └── projects/         # Project management
-├── inngest/              # Inngest client
-└── lib/                  # Utilities
+│   ├── auth/                # Clerk + Convex providers
+│   ├── conversations/       # Chat, Inngest agent (process-message)
+│   ├── editor/              # CodeMirror setup + extensions
+│   ├── preview/             # WebContainer, terminal
+│   └── projects/            # Dashboard, explorer, GitHub UIs
+├── inngest/                 # Inngest client
+└── lib/                     # editor-ai, firecrawl, utils
 
 convex/
-├── schema.ts             # Database schema
-├── projects.ts           # Project queries/mutations
-├── files.ts              # File operations
-├── conversations.ts      # Conversation operations
-└── system.ts             # Internal API for Inngest
+├── schema.ts                # projects / files / conversations / messages
+├── auth.ts, projects.ts, files.ts, conversations.ts
+└── system.ts                # Internal, TURBO_CONVEX_INTERNAL_KEY-guarded API
 ```
-
-## Features Implemented (Part 1)
-
-### Editor
-
-- Syntax highlighting for JS, TS, CSS, HTML, JSON, Markdown, Python
-- Line numbers and code folding
-- Minimap overview
-- Bracket matching and indentation guides
-- Multi-cursor editing
-
-### AI Features
-
-- Real-time code suggestions with ghost text
-- Quick edit with Cmd+K (select code + natural language instruction)
-- Selection tooltip for quick actions
-- Conversation sidebar with message history
-
-### File Management
-
-- File explorer with folder hierarchy
-- Create, rename, delete files and folders
-- VSCode-style file icons
-- Tab-based file navigation
-- Auto-save with debouncing
-
-### Real-time
-
-- Convex-powered instant updates
-- Optimistic UI updates
-- Background job processing with Inngest
-
-## Features Implemented (Part 2)
-
-- AI agent with file management tools (create, read, update files)
-- In-browser code preview and execution with WebContainer
-- Static site and nested package.json project support
-- GitHub import & export
-- AI project generation from a prompt
 
 ## Scripts
 
@@ -241,7 +276,8 @@ npm run lint      # Run ESLint
 
 ## Acknowledgments
 
-- [Cursor](https://cursor.sh) - Inspiration for the project
-- [Orchids](https://orchids.app) - Inspiration for the project
-- [shadcn/ui](https://ui.shadcn.com) - UI components
-- [CodeMirror](https://codemirror.net) - Code editor
+- [Cursor](https://cursor.sh) — inspiration
+- [Orchids](https://orchids.app) — inspiration
+- [shadcn/ui](https://ui.shadcn.com) — UI components
+- [CodeMirror](https://codemirror.net) — code editor
+- [WebContainer](https://webcontainers.io) — in-browser execution
