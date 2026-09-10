@@ -20,29 +20,32 @@ export const ProjectIdLayout = ({
   projectId: Id<"projects">;
 }) => {
   return (
-    <div className="w-full h-screen flex flex-col">
-      <Navbar projectId={projectId} />
-      <div className="flex-1 flex overflow-hidden">
-        <Allotment
-          className="flex-1"
-          defaultSizes={[
-            DEFAULT_CONVERSATION_SIDEBAR_WIDTH,
-            DEFAULT_MAIN_SIZE
-          ]}
-        >
-          <Allotment.Pane
-            snap
-            minSize={MIN_SIDEBAR_WIDTH}
-            maxSize={MAX_SIDEBAR_WIDTH}
-            preferredSize={DEFAULT_CONVERSATION_SIDEBAR_WIDTH}
+    <>
+      <div className="brand-bg-overlay" />
+      <div className="w-full h-screen relative z-10 flex flex-col">
+        <Navbar projectId={projectId} />
+        <div className="flex-1 flex overflow-hidden">
+          <Allotment
+            className="flex-1"
+            defaultSizes={[
+              DEFAULT_CONVERSATION_SIDEBAR_WIDTH,
+              DEFAULT_MAIN_SIZE
+            ]}
           >
-            <ConversationSidebar projectId={projectId} />
-          </Allotment.Pane>
-          <Allotment.Pane>
-            {children}
-          </Allotment.Pane>
-        </Allotment>
+            <Allotment.Pane
+              snap
+              minSize={MIN_SIDEBAR_WIDTH}
+              maxSize={MAX_SIDEBAR_WIDTH}
+              preferredSize={DEFAULT_CONVERSATION_SIDEBAR_WIDTH}
+            >
+              <ConversationSidebar projectId={projectId} />
+            </Allotment.Pane>
+            <Allotment.Pane>
+              {children}
+            </Allotment.Pane>
+          </Allotment>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
