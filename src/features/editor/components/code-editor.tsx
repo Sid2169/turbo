@@ -64,6 +64,6 @@ export const CodeEditor = ({
   }, [languageExtension]);
 
   return (
-    <div ref={editorRef} className="size-full pl-4 bg-background" />
+    <div ref={editorRef} className="size-full pl-4 bg-background/80" />
   );
 };
